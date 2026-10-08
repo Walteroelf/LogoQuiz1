@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>logo! Klassenquiz</title>
+
+  <!-- OCR-Bibliothek Tesseract.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #005bbb;
+      --primary-dark: #003f82;
+      --accent: #ffcc00;
+      --text: #1d1d1f;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+    }
+
+    header p {
+      margin: 10px auto 0;
+      max-width: 800px;
+      font-size: 1.1rem;
+      opacity: 0.95;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px 40px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--primary-dark);
+    }
+
+    .hint {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .upload-area {
+      border: 3px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      text-align: center;
+      background: #fafafa;
+    }
+
+    input[type="file"] {
+      margin-top: 12px;
+      font-size: 1rem;
+    }
+
+    .preview-wrapper {
+      margin-top: 20px;
+      display: none;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    canvas {
+      max-width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: white;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 22px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: var(--text);
+    }
+
+    button.secondary:hover {
+      background: #d1d5db;
+    }
+
+    button.success {
+      background: var(--success);
+    }
+
+    button.success:hover {
+      background: #15803d;
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    button.danger:hover {
+      background: #991b1b;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status {
+      margin-top: 16px;
+      padding: 12px 14px;
+      background: #eff6ff;
+      border-left: 5px solid var(--primary);
+      border-radius: 10px;
+      display: none;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      resize: vertical;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    textarea.question {
+      min-height: 110px;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .answer-box {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .answer-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .letter {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    select {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    .quiz-screen {
+      display: none;
+      min-height: 100vh;
+      background: #0f172a;
+      color: white;
+      padding: 28px;
+    }
+
+    .quiz-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .quiz-title {
+      text-align: center;
+      color: var(--accent);
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin: 0 0 20px;
+    }
+
+    .quiz-question {
+      background: white;
+      color: #111827;
+      border-radius: 24px;
+      padding: 28px;
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.25;
+      margin-bottom: 28px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    }
+
+    .quiz-answers {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .quiz-answer {
+      border-radius: 24px;
+      padding: 26px;
+      min-height: 170px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      font-weight: 800;
+      line-height: 1.25;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      border: 6px solid transparent;
+    }
+
+    .quiz-answer .big-letter {
+      flex: 0 0 auto;
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.95);
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      font-weight: 1000;
+    }
+
+    .a { background: #2563eb; }
+    .b { background: #dc2626; }
+    .c { background: #16a34a; }
+    .d { background: #9333ea; }
+
+    .quiz-answer.correct {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 10px rgba(255, 204, 0, 0.35);
+    }
+
+    .quiz-controls {
+      margin-top: 26px;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 800px) {
+      .answers-grid,
+      .quiz-answers {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-answer {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="editorView">
+    <header>
+      <h1>logo! Klassenquiz</h1>
+      <p>
+        Foto einer ausgefüllten Vorlage hochladen, Frage und Antworten erkennen lassen
+        und daraus ein Quiz für die digitale Tafel starten.
+      </p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Foto hochladen</h2>
+        <p class="hint">
+          Fotografiere die Vorlage möglichst gerade, hell und vollständig.
+          Die Schülerinnen und Schüler sollten am besten groß und in Druckbuchstaben schreiben.
+        </p>
+
+        <div class="upload-area">
+          <strong>Foto der ausgefüllten Vorlage auswählen</strong><br />
+          <input id="imageInput" type="file" accept="image/*" />
+        </div>
+
+        <div class="preview-wrapper" id="previewWrapper">
+          <div>
+            <h3>Vorschau</h3>
+            <canvas id="previewCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="ocrButton" disabled>Text automatisch erkennen</button>
+          <button class="secondary" id="clearButton">Zurücksetzen</button>
+        </div>
+
+        <div class="status" id="statusBox"></div>
+      </section>
+
+      <section class="card">
+        <h2>Erkannte Texte prüfen und korrigieren</h2>
+        <p class="hint">
+          Kontrolliere die OCR-Ergebnisse. Handschrift wird nicht immer zuverlässig erkannt.
+        </p>
+
+        <div class="form-grid">
+          <div>
+            <label for="questionText">Frage</label>
+            <textarea id="questionText" class="question" placeholder="Hier steht die erkannte Frage ..."></textarea>
+          </div>
+
+          <div class="answers-grid">
+            <div class="answer-box">
+              <div class="answer-header">
+                <span class="letter">A</span>
+                <label for="answerA">Antwort A</label>
+              </div>
+              <textarea id="answerA" placeholder="Antwort A ..."></textarea>
+            </div>
+
+            <div class="answer-box">
+              <div class="answer-header">
+                <span class="letter">B</span>
+                <label for="answerB">Antwort B</label>
+              </div>
+              <textarea id="answerB" placeholder="Antwort B ..."></textarea>
+            </div>
+
+            <div class="answer-box">
+              <div class="answer-header">
+                <span class="letter">C</span>
+                <label for="answerC">Antwort C</label>
+              </div>
+              <textarea id="answerC" placeholder="Antwort C ..."></textarea>
+            </div>
+
+            <div class="answer-box">
+              <div class="answer-header">
+                <span class="letter">D</span>
+                <label for="answerD">Antwort D</label>
+              </div>
+              <textarea id="answerD" placeholder="Antwort D ..."></textarea>
+            </div>
+          </div>
+
+          <div>
+            <label for="correctAnswer">Richtige Antwort</label>
+            <select id="correctAnswer">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="success" id="startQuizButton">Quiz starten</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Wichtig zur Vorlage</h2>
+        <p class="hint">
+          Diese App geht davon aus, dass sich die Frage oben in einem großen Feld befindet
+          und die vier Antworten unten in einem Raster mit zwei Spalten und zwei Zeilen stehen.
+          Falls deine Bildvorlage anders geschnitten ist, können die Prozentwerte im JavaScript-Bereich
+          bei <strong>FIELDS</strong> angepasst werden.
+        </p>
+        <p class="footer-note">
+          Datenschutz-Hinweis: Die OCR läuft im Browser. Es werden keine Fotos durch diese App gespeichert.
+          Die OCR-Bibliothek wird allerdings über ein CDN geladen.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <div id="quizView" class="quiz-screen">
+    <div class="quiz-inner">
+      <h1 class="quiz-title">logo! Klassenquiz</h1>
+
+      <div id="quizQuestion" class="quiz-question"></div>
+
+      <div class="quiz-answers">
+        <div id="quizA" class="quiz-answer a">
+          <div class="big-letter">A</div>
+          <div class="answer-content"></div>
+        </div>
+
+        <div id="quizB" class="quiz-answer b">
+          <div class="big-letter">B</div>
+          <div class="answer-content"></div>
+        </div>
+
+        <div id="quizC" class="quiz-answer c">
+          <div class="big-letter">C</div>
+          <div class="answer-content"></div>
+        </div>
+
+        <div id="quizD" class="quiz-answer d">
+          <div class="big-letter">D</div>
+          <div class="answer-content"></div>
+        </div>
+      </div>
+
+      <div class="quiz-controls">
+        <button id="revealButton">Richtige Antwort zeigen</button>
+        <button class="secondary" id="backButton">Zur Bearbeitung</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById("imageInput");
+    const previewCanvas = document.getElementById("previewCanvas");
+    const previewWrapper = document.getElementById("previewWrapper");
+    const ocrButton = document.getElementById("ocrButton");
+    const clearButton = document.getElementById("clearButton");
+    const statusBox = document.getElementById("statusBox");
+
+    const questionText = document.getElementById("questionText");
+    const answerA = document.getElementById("answerA");
+    const answerB = document.getElementById("answerB");
+    const answerC = document.getElementById("answerC");
+    const answerD = document.getElementById("answerD");
+    const correctAnswer = document.getElementById("correctAnswer");
+
+    const startQuizButton = document.getElementById("startQuizButton");
+    const editorView = document.getElementById("editorView");
+    const quizView = document.getElementById("quizView");
+    const quizQuestion = document.getElementById("quizQuestion");
+    const revealButton = document.getElementById("revealButton");
+    const backButton = document.getElementById("backButton");
+
+    let loadedImage = null;
+
+    /*
+      Anpassung an die Vorlage:
+      x, y, w, h sind Prozentwerte bezogen auf das gesamte Foto.
+
+      Standard-Annahme:
+      - oben großes Fragefeld
+      - unten vier Antwortfelder in 2x2-Anordnung
+
+      Wenn die Erkennung daneben liegt, diese Werte anpassen.
+    */
+    const FIELDS = {
+      question: { x: 8,  y: 7,  w: 84, h: 31 },
+      A:        { x: 8,  y: 45, w: 39, h: 20 },
+      B:        { x: 53, y: 45, w: 39, h: 20 },
+      C:        { x: 8,  y: 70, w: 39, h: 20 },
+      D:        { x: 53, y: 70, w: 39, h: 20 }
+    };
+
+    imageInput.addEventListener("change", handleImageUpload);
+    ocrButton.addEventListener("click", runOCR);
+    clearButton.addEventListener("click", clearAll);
+    startQuizButton.addEventListener("click", startQuiz);
+    revealButton.addEventListener("click", revealCorrectAnswer);
+    backButton.addEventListener("click", backToEditor);
+
+    function setStatus(message) {
+      statusBox.style.display = "block";
+      statusBox.textContent = message;
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const img = new Image();
+      img.onload = () => {
+        loadedImage = img;
+        drawPreview();
+        previewWrapper.style.display = "flex";
+        ocrButton.disabled = false;
+        setStatus("Foto geladen. Du kannst jetzt die Texterkennung starten.");
+      };
+
+      img.src = URL.createObjectURL(file);
+    }
+
+    function drawPreview() {
+      const maxWidth = 900;
+      const scale = Math.min(1, maxWidth / loadedImage.width);
+
+      previewCanvas.width = loadedImage.width * scale;
+      previewCanvas.height = loadedImage.height * scale;
+
+      const ctx = previewCanvas.getContext("2d");
+      ctx.drawImage(loadedImage, 0, 0, previewCanvas.width, previewCanvas.height);
+
+      drawFieldOutlines(ctx, scale);
+    }
+
+    function drawFieldOutlines(ctx, scale) {
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#ffcc00";
+      ctx.font = "bold 28px sans-serif";
+      ctx.fillStyle = "#ffcc00";
+
+      Object.entries(FIELDS).forEach(([key, field]) => {
+        const rect = percentToPixels(field, previewCanvas.width, previewCanvas.height);
+        ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+        ctx.fillText(key === "question" ? "Frage" : key, rect.x + 10, rect.y + 34);
+      });
+    }
+
+    function percentToPixels(field, width, height) {
+      return {
+        x: Math.round((field.x / 100) * width),
+        y: Math.round((field.y / 100) * height),
+        w: Math.round((field.w / 100) * width),
+        h: Math.round((field.h / 100) * height)
+      };
+    }
+
+    async function runOCR() {
+      if (!loadedImage) return;
+
+      ocrButton.disabled = true;
+      setStatus("Texterkennung läuft. Das kann je nach Gerät etwas dauern ...");
+
+      try {
+        const results = {};
+
+        for (const [key, field] of Object.entries(FIELDS)) {
+          setStatus(`Erkenne Bereich: ${key === "question" ? "Frage" : "Antwort " + key} ...`);
+
+          const cropCanvas = cropField(field);
+          const processedCanvas = preprocessCanvas(cropCanvas);
+
+          const result = await Tesseract.recognize(
+            processedCanvas,
+            "deu",
+            {
+              logger: info => {
+                if (info.status === "recognizing text") {
+                  const progress = Math.round(info.progress * 100);
+                  setStatus(`OCR ${key}: ${progress}%`);
+                }
+              }
+            }
+          );
+
+          results[key] = cleanText(result.data.text);
+        }
+
+        questionText.value = results.question || "";
+        answerA.value = results.A || "";
+        answerB.value = results.B || "";
+        answerC.value = results.C || "";
+        answerD.value = results.D || "";
+
+        setStatus("Texterkennung abgeschlossen. Bitte prüfe und korrigiere die Texte.");
+      } catch (error) {
+        console.error(error);
+        setStatus("Fehler bei der Texterkennung. Du kannst die Texte auch manuell eintragen.");
+      } finally {
+        ocrButton.disabled = false;
+      }
+    }
+
+    function cropField(field) {
+      const canvas = document.createElement("canvas");
+      const sourceWidth = loadedImage.width;
+      const sourceHeight = loadedImage.height;
+      const rect = percentToPixels(field, sourceWidth, sourceHeight);
+
+      canvas.width = rect.w;
+      canvas.height = rect.h;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(
+        loadedImage,
+        rect.x,
+        rect.y,
+        rect.w,
+        rect.h,
+        0,
+        0,
+        rect.w,
+        rect.h
+      );
+
+      return canvas;
+    }
+
+    function preprocessCanvas(inputCanvas) {
+      /*
+        Einfache Bildverbesserung:
+        - Vergrößerung
+        - Graustufen
+        - Kontrast durch Schwellenwert
+      */
+      const scale = 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = inputCanvas.width * scale;
+      canvas.height = inputCanvas.height * scale;
+
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(inputCanvas, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+        const value = gray > 170 ? 255 : 0;
+
+        data[i] = value;
+        data[i + 1] = value;
+        data[i + 2] = value;
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      return canvas;
+    }
+
+    function cleanText(text) {
+      return text
+        .replace(/\n+/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/[|{}[\]<>]/g, "")
+        .trim();
+    }
+
+    function startQuiz() {
+      const q = questionText.value.trim();
+      const a = answerA.value.trim();
+      const b = answerB.value.trim();
+      const c = answerC.value.trim();
+      const d = answerD.value.trim();
+
+      if (!q || !a || !b || !c || !d) {
+        alert("Bitte fülle die Frage und alle vier Antworten aus.");
+        return;
+      }
+
+      quizQuestion.textContent = q;
+
+      setQuizAnswer("A", a);
+      setQuizAnswer("B", b);
+      setQuizAnswer("C", c);
+      setQuizAnswer("D", d);
+
+      removeCorrectHighlights();
+
+      editorView.style.display = "none";
+      quizView.style.display = "block";
+
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    }
+
+    function setQuizAnswer(letter, text) {
+      const box = document.getElementById("quiz" + letter);
+      box.querySelector(".answer-content").textContent = text;
+    }
+
+    function revealCorrectAnswer() {
+      removeCorrectHighlights();
+      const letter = correctAnswer.value;
+      document.getElementById("quiz" + letter).classList.add("correct");
+    }
+
+    function removeCorrectHighlights() {
+      ["A", "B", "C", "D"].forEach(letter => {
+        document.getElementById("quiz" + letter).classList.remove("correct");
+      });
+    }
+
+    function backToEditor() {
+      quizView.style.display = "none";
+      editorView.style.display = "block";
+      removeCorrectHighlights();
+
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function clearAll() {
+      loadedImage = null;
+      imageInput.value = "";
+      questionText.value = "";
+      answerA.value = "";
+      answerB.value = "";
+      answerC.value = "";
+      answerD.value = "";
+      correctAnswer.value = "A";
+      previewWrapper.style.display = "none";
+      ocrButton.disabled = true;
+      statusBox.style.display = "none";
+
+      const ctx = previewCanvas.getContext("2d");
+      ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    }
+  </script>
+</body>
+</html>
