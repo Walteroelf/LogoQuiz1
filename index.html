@@ -288,7 +288,7 @@
     }
 
     /* ---------------------------
-       Quiz-Ansicht für iPad
+       Quiz-Ansicht
        --------------------------- */
 
     .quiz-screen {
@@ -338,6 +338,26 @@
       white-space: nowrap;
     }
 
+    .quiz-close-button {
+      justify-self: end;
+      width: clamp(48px, 7vw, 68px);
+      height: clamp(48px, 7vw, 68px);
+      padding: 0;
+      border-radius: 50%;
+      background: #dc2626;
+      color: white;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1;
+      font-weight: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quiz-close-button:hover {
+      background: #991b1b;
+    }
+
     .quiz-question {
       background: white;
       color: #111827;
@@ -379,8 +399,20 @@
     }
 
     .quiz-answer.correct {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 8px rgba(255,204,0,0.35);
+      background: #16a34a;
+      border-color: #16a34a;
+      box-shadow: 0 0 0 8px rgba(22, 163, 74, 0.35);
+    }
+
+    .quiz-answer.correct .answer-image-wrap {
+      background: white;
+    }
+
+    .quiz-answer.correct .big-letter {
+      background: #dc2626;
+      color: white;
+      border: 6px solid white;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.25);
     }
 
     .big-letter {
@@ -396,10 +428,12 @@
       font-weight: 1000;
     }
 
-    .letter-a { background: #2563eb; }
-    .letter-b { background: #dc2626; }
-    .letter-c { background: #16a34a; }
-    .letter-d { background: #9333ea; }
+    .letter-a,
+    .letter-b,
+    .letter-c,
+    .letter-d {
+      background: #dc2626;
+    }
 
     .answer-image-wrap {
       flex: 1;
@@ -411,6 +445,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 4px;
     }
 
     .answer-image-wrap img {
@@ -449,6 +484,10 @@
         grid-template-rows: auto auto auto auto;
       }
 
+      .quiz-topbar {
+        grid-template-columns: 1fr auto 1fr;
+      }
+
       .quiz-answers {
         grid-template-columns: 1fr;
         grid-template-rows: none;
@@ -461,14 +500,6 @@
       .quiz-question {
         min-height: 170px;
       }
-
-      .quiz-topbar {
-        grid-template-columns: 1fr;
-      }
-
-      .quiz-progress {
-        justify-self: center;
-      }
     }
   </style>
 </head>
@@ -480,13 +511,14 @@
 
       <p>
         Fotografiere eine oder mehrere ausgefüllte Fragenkarten.
-        Die App erkennt die vier schwarzen Eckmarken automatisch, entzerrt das Foto und erstellt daraus die Quizfrage.
+        Die App erkennt die vier schwarzen Eckmarken automatisch, richtet das Foto gerade aus
+        und erstellt daraus die Quizfrage.
       </p>
 
       <ul>
         <li>Die vier schwarzen Eckmarken müssen auf dem Foto sichtbar sein.</li>
         <li>Das Foto darf leicht schräg aufgenommen sein.</li>
-        <li>Der obere schwarze Fragekasten wird vollständig übernommen, inklusive „Frage:“.</li>
+        <li>Die App nutzt möglichst genau die schwarzen Rahmen der Textfelder.</li>
         <li>Wenn eine Karte nicht erkannt wird, wird sie übersprungen und gemeldet.</li>
         <li>Das Quiz ist besonders für ein iPad im Querformat geeignet.</li>
       </ul>
@@ -542,7 +574,7 @@
       <div class="quiz-topbar">
         <div id="quizProgress" class="quiz-progress">1 / 1</div>
         <h1 class="quiz-title">Logo-Quiz</h1>
-        <div></div>
+        <button id="backButton" class="quiz-close-button" aria-label="Quiz abbrechen">×</button>
       </div>
 
       <div class="quiz-question">
@@ -584,7 +616,6 @@
         <button id="revealButton">Richtige Antwort zeigen</button>
         <button id="nextQuestionButton">Nächste Frage</button>
         <button id="shuffleButton" class="secondary">Antworten neu mischen</button>
-        <button id="backButton" class="secondary">Bearbeitung</button>
       </div>
     </div>
   </div>
@@ -687,23 +718,32 @@
     let correctLetter = null;
     let isProcessing = false;
 
-    const NORMALIZED_WIDTH = 1000;
-    const NORMALIZED_HEIGHT = 820;
+    /*
+      Werte passend zur fertigen JPG-Vorlage.
+      Die Vorlage hat ungefähr 1021 x 724 px.
+      Die vier schwarzen Eckmarken werden auf diese Zielpunkte transformiert.
+    */
+    const NORMALIZED_WIDTH = 1021;
+    const NORMALIZED_HEIGHT = 724;
 
     const TARGET_MARKERS = {
-      topLeft:     { x: 120, y: 80 },
-      topRight:    { x: 880, y: 80 },
-      bottomRight: { x: 880, y: 720 },
-      bottomLeft:  { x: 120, y: 720 }
+      topLeft:     { x: 141, y: 76 },
+      topRight:    { x: 908, y: 76 },
+      bottomRight: { x: 908, y: 668 },
+      bottomLeft:  { x: 141, y: 668 }
     };
 
+    /*
+      Ausschnitte möglichst exakt entlang der schwarzen Textfeld-Umrandungen.
+      Beim Fragefeld wird dadurch der Text darunter nicht mehr mitgenommen.
+    */
     const CROP_FIELDS = {
-      question: { x: 90, y: 118, w: 820, h: 198 },
+      question: { x: 112, y: 110, w: 824, h: 154 },
 
-      correct:  { x: 110, y: 345, w: 370, h: 135 },
-      wrong1:   { x: 520, y: 345, w: 370, h: 135 },
-      wrong2:   { x: 110, y: 530, w: 370, h: 135 },
-      wrong3:   { x: 520, y: 530, w: 370, h: 135 }
+      correct:  { x: 111, y: 293, w: 402, h: 153 },
+      wrong1:   { x: 531, y: 293, w: 402, h: 153 },
+      wrong2:   { x: 111, y: 481, w: 402, h: 153 },
+      wrong3:   { x: 531, y: 481, w: 402, h: 153 }
     };
 
     introOkButton.addEventListener("click", () => {
@@ -953,6 +993,7 @@
         }
 
         candidates.sort((a, b) => b.area - a.area);
+
         const bestFour = candidates.slice(0, 4);
         const orderedDisplayPoints = orderPoints(bestFour);
 
