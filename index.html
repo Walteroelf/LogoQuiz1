@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Logo-Quiz mit Foto-Erkennung</title>
+  <title>Logo-Quiz mit mehreren Fragen</title>
 
   <style>
     :root {
@@ -35,7 +35,7 @@
     header {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      padding: 28px 20px;
+      padding: 24px 20px;
       text-align: center;
     }
 
@@ -47,7 +47,7 @@
     header p {
       margin: 10px auto 0;
       max-width: 900px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       opacity: 0.95;
     }
 
@@ -70,11 +70,6 @@
       color: var(--primary-dark);
     }
 
-    h3 {
-      margin-bottom: 8px;
-      color: var(--primary-dark);
-    }
-
     .hint {
       color: var(--muted);
       line-height: 1.5;
@@ -83,7 +78,7 @@
     .upload-area {
       border: 3px dashed var(--border);
       border-radius: var(--radius);
-      padding: 26px;
+      padding: 24px;
       text-align: center;
       background: #fafafa;
     }
@@ -158,6 +153,15 @@
       line-height: 1.4;
     }
 
+    .question-counter-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: #ecfdf5;
+      border-left: 5px solid var(--success);
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
     .workspace {
       display: none;
       grid-template-columns: 1fr 1fr;
@@ -214,78 +218,141 @@
       object-fit: contain;
     }
 
+    .question-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .question-list-item {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .question-list-item strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary-dark);
+    }
+
+    .question-list-item img {
+      width: 100%;
+      height: 70px;
+      object-fit: contain;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* ---------------------------
+       Quiz-Ansicht für iPad
+       --------------------------- */
+
     .quiz-screen {
       display: none;
+      width: 100vw;
+      height: 100dvh;
       min-height: 100vh;
       background: #0f172a;
       color: white;
-      padding: 28px;
+      overflow: hidden;
+      padding: 14px;
     }
 
     .quiz-inner {
-      max-width: 1450px;
+      height: 100%;
+      max-width: 1180px;
       margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto minmax(110px, 22vh) 1fr auto;
+      gap: 12px;
+    }
+
+    .quiz-topbar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
     }
 
     .quiz-title {
-      text-align: center;
+      margin: 0;
       color: var(--accent);
-      font-size: clamp(2rem, 5vw, 4rem);
-      margin: 0 0 20px;
+      font-size: clamp(1.7rem, 4vw, 3.1rem);
+      line-height: 1;
+      text-align: center;
+    }
+
+    .quiz-progress {
+      justify-self: start;
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      font-weight: 1000;
+      color: white;
+      white-space: nowrap;
     }
 
     .quiz-question {
       background: white;
       color: #111827;
-      border-radius: 24px;
-      padding: 20px;
-      margin-bottom: 26px;
-      min-height: 170px;
+      border-radius: 22px;
+      padding: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+      min-height: 0;
     }
 
     .quiz-question img {
       max-width: 100%;
-      max-height: 260px;
+      max-height: 100%;
       object-fit: contain;
+      display: block;
     }
 
     .quiz-answers {
+      min-height: 0;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 22px;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 14px;
     }
 
     .quiz-answer {
-      border-radius: 24px;
-      padding: 18px;
-      min-height: 215px;
+      min-height: 0;
+      border-radius: 22px;
+      padding: 12px;
       display: flex;
-      gap: 16px;
+      gap: 12px;
       align-items: center;
       background: white;
-      border: 8px solid transparent;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      border: 7px solid transparent;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+      overflow: hidden;
     }
 
     .quiz-answer.correct {
       border-color: var(--accent);
-      box-shadow: 0 0 0 10px rgba(255,204,0,0.35);
+      box-shadow: 0 0 0 8px rgba(255,204,0,0.35);
     }
 
     .big-letter {
       flex: 0 0 auto;
-      width: 78px;
-      height: 78px;
+      width: clamp(54px, 8vw, 78px);
+      height: clamp(54px, 8vw, 78px);
       border-radius: 50%;
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.8rem;
+      font-size: clamp(2rem, 5vw, 2.8rem);
       font-weight: 1000;
     }
 
@@ -296,8 +363,10 @@
 
     .answer-image-wrap {
       flex: 1;
+      height: 100%;
+      min-width: 0;
       background: white;
-      border-radius: 14px;
+      border-radius: 12px;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -306,17 +375,21 @@
 
     .answer-image-wrap img {
       width: 100%;
-      max-height: 220px;
+      height: 100%;
       object-fit: contain;
       display: block;
     }
 
     .quiz-controls {
-      margin-top: 26px;
       display: flex;
       justify-content: center;
-      gap: 14px;
+      gap: 10px;
       flex-wrap: wrap;
+    }
+
+    .quiz-controls button {
+      padding: 11px 18px;
+      font-size: 0.95rem;
     }
 
     .note {
@@ -329,13 +402,41 @@
         grid-template-columns: 1fr;
       }
 
-      .quiz-answers,
       .answer-preview-grid {
         grid-template-columns: 1fr;
       }
+    }
+
+    @media (orientation: portrait) {
+      .quiz-screen {
+        overflow: auto;
+      }
+
+      .quiz-inner {
+        height: auto;
+        min-height: 100dvh;
+        grid-template-rows: auto auto auto auto;
+      }
+
+      .quiz-answers {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+      }
 
       .quiz-answer {
-        min-height: 160px;
+        min-height: 140px;
+      }
+
+      .quiz-question {
+        min-height: 140px;
+      }
+
+      .quiz-topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-progress {
+        justify-self: center;
       }
     }
   </style>
@@ -346,33 +447,39 @@
     <header>
       <h1>Logo-Quiz</h1>
       <p>
-        Foto der ausgefüllten Vorlage hochladen, Eckmarken erkennen lassen,
-        Vorlage entzerren und daraus ein Quiz mit handschriftlichen Bildausschnitten erstellen.
+        Mehrere ausgefüllte Fragenkarten fotografieren, entzerren und als Quizsammlung starten.
       </p>
     </header>
 
     <main>
       <section class="card">
-        <h2>Foto hochladen</h2>
+        <h2>Fotos hinzufügen</h2>
 
         <p class="hint">
-          Die App sucht die vier schwarzen Quadrate auf der Vorlage. Falls die automatische Erkennung nicht passt,
-          kannst du die gelben Punkte mit Maus oder Finger direkt auf die schwarzen Quadrate ziehen.
+          Du kannst mehrere Fotos auswählen. Die App verarbeitet immer ein Foto nach dem anderen.
+          Prüfe die Eckpunkte, erzeuge die Ausschnitte und füge die Frage anschließend zur Sammlung hinzu.
         </p>
 
         <div class="upload-area">
-          <strong>Foto der ausgefüllten Vorlage auswählen</strong><br />
-          <input id="imageInput" type="file" accept="image/*" />
+          <strong>Foto oder mehrere Fotos der ausgefüllten Vorlage auswählen</strong><br />
+          <input id="imageInput" type="file" accept="image/*" multiple />
         </div>
 
         <div class="controls">
           <button id="detectButton" disabled>Eckmarken automatisch suchen</button>
           <button id="rectifyButton" disabled>Entzerren und Ausschnitte erzeugen</button>
+          <button id="addQuestionButton" class="success" disabled>Diese Frage hinzufügen</button>
+          <button id="nextPhotoButton" class="secondary" disabled>Nächstes Foto laden</button>
           <button id="startQuizButton" class="success" disabled>Quiz starten</button>
-          <button id="clearButton" class="secondary">Zurücksetzen</button>
+          <button id="clearCurrentButton" class="secondary">Aktuelles Foto zurücksetzen</button>
+          <button id="clearAllButton" class="danger">Alles löschen</button>
         </div>
 
         <div id="statusBox" class="status"></div>
+
+        <div id="questionCounterBox" class="question-counter-box">
+          Gesammelte Fragen: <span id="questionCount">0</span>
+        </div>
       </section>
 
       <section id="workspace" class="card workspace">
@@ -389,7 +496,7 @@
           <h2>Entzerrte Vorlage</h2>
           <canvas id="rectifiedCanvas"></canvas>
           <p class="canvas-note">
-            Die grünen Rahmen zeigen die Bereiche, die später im Quiz als Bildausschnitte erscheinen.
+            Die grünen Rahmen zeigen die Bereiche, die später im Quiz erscheinen.
           </p>
         </div>
       </section>
@@ -427,31 +534,33 @@
         </div>
       </section>
 
-      <section class="card">
-        <h2>Hinweise für robuste Fotos</h2>
+      <section id="questionListSection" class="card" style="display:none;">
+        <h2>Fragensammlung</h2>
         <p class="hint">
-          Das Foto darf etwas schräg, gedreht oder aus unterschiedlichem Abstand aufgenommen sein.
-          Wichtig ist aber: Alle vier schwarzen Eckmarken müssen sichtbar sein.
+          Diese Fragen sind bereits im Quiz enthalten.
         </p>
+        <div id="questionList" class="question-list"></div>
+      </section>
 
+      <section class="card">
+        <h2>Hinweise</h2>
         <ul class="hint">
-          <li>Die Vorlage vollständig fotografieren.</li>
-          <li>Möglichst hell fotografieren.</li>
-          <li>Keine Eckmarke abschneiden oder verdecken.</li>
-          <li>Bei schlechter Erkennung die gelben Punkte manuell verschieben.</li>
+          <li>Alle vier schwarzen Eckmarken müssen sichtbar sein.</li>
+          <li>Wenn die Automatik nicht passt, die gelben Punkte manuell verschieben.</li>
+          <li>Nach jeder Karte auf <strong>„Diese Frage hinzufügen“</strong> klicken.</li>
+          <li>Danach das nächste Foto laden oder direkt das Quiz starten.</li>
         </ul>
-
-        <p class="note">
-          Datenschutz-Hinweis: Das Foto wird im Browser verarbeitet und nicht durch diese App gespeichert.
-          Für die Bildentzerrung wird OpenCV.js über ein CDN geladen.
-        </p>
       </section>
     </main>
   </div>
 
   <div id="quizView" class="quiz-screen">
     <div class="quiz-inner">
-      <h1 class="quiz-title">Logo-Quiz</h1>
+      <div class="quiz-topbar">
+        <div id="quizProgress" class="quiz-progress">1 / 1</div>
+        <h1 class="quiz-title">Logo-Quiz</h1>
+        <div></div>
+      </div>
 
       <div class="quiz-question">
         <img id="quizQuestionImage" alt="Quizfrage" />
@@ -488,9 +597,11 @@
       </div>
 
       <div class="quiz-controls">
+        <button id="prevQuestionButton" class="secondary">Zurück</button>
         <button id="revealButton">Richtige Antwort zeigen</button>
+        <button id="nextQuestionButton">Nächste Frage</button>
         <button id="shuffleButton" class="secondary">Antworten neu mischen</button>
-        <button id="backButton" class="secondary">Zurück zur Bearbeitung</button>
+        <button id="backButton" class="secondary">Bearbeitung</button>
       </div>
     </div>
   </div>
@@ -504,7 +615,7 @@
     window.Module = {
       onRuntimeInitialized() {
         cvReady = true;
-        setStatus("Bildverarbeitung ist bereit. Du kannst ein Foto hochladen.");
+        setStatus("Bildverarbeitung ist bereit. Du kannst ein oder mehrere Fotos hochladen.");
         updateButtonStates();
       }
     };
@@ -517,11 +628,18 @@
 
     const detectButton = document.getElementById("detectButton");
     const rectifyButton = document.getElementById("rectifyButton");
+    const addQuestionButton = document.getElementById("addQuestionButton");
+    const nextPhotoButton = document.getElementById("nextPhotoButton");
     const startQuizButton = document.getElementById("startQuizButton");
-    const clearButton = document.getElementById("clearButton");
+    const clearCurrentButton = document.getElementById("clearCurrentButton");
+    const clearAllButton = document.getElementById("clearAllButton");
 
     const statusBox = document.getElementById("statusBox");
     const workspace = document.getElementById("workspace");
+
+    const questionCount = document.getElementById("questionCount");
+    const questionListSection = document.getElementById("questionListSection");
+    const questionList = document.getElementById("questionList");
 
     const sourceCanvas = document.getElementById("sourceCanvas");
     const sourceCtx = sourceCanvas.getContext("2d");
@@ -533,7 +651,6 @@
     const originalCtx = originalCanvas.getContext("2d");
 
     const normalizedCanvas = document.getElementById("normalizedCanvas");
-    const normalizedCtx = normalizedCanvas.getContext("2d");
 
     const cropPreviewSection = document.getElementById("cropPreviewSection");
 
@@ -546,6 +663,7 @@
     const editorView = document.getElementById("editorView");
     const quizView = document.getElementById("quizView");
 
+    const quizProgress = document.getElementById("quizProgress");
     const quizQuestionImage = document.getElementById("quizQuestionImage");
 
     const quizAnswerA = document.getElementById("quizAnswerA");
@@ -561,29 +679,23 @@
     const revealButton = document.getElementById("revealButton");
     const shuffleButton = document.getElementById("shuffleButton");
     const backButton = document.getElementById("backButton");
+    const prevQuestionButton = document.getElementById("prevQuestionButton");
+    const nextQuestionButton = document.getElementById("nextQuestionButton");
+
+    let selectedFiles = [];
+    let currentFileIndex = 0;
 
     let loadedImage = null;
     let displayScale = 1;
-
     let markerPoints = null;
     let draggingPointIndex = null;
 
-    let crops = {
-      question: null,
-      correct: null,
-      wrong1: null,
-      wrong2: null,
-      wrong3: null
-    };
+    let currentCrops = createEmptyCrops();
 
+    let questions = [];
+    let currentQuizIndex = 0;
     let correctLetter = null;
 
-    /*
-      Normalisierte Arbeitsfläche.
-
-      Die vier schwarzen Eckmarken werden auf diese festen Zielpunkte abgebildet.
-      Dadurch ist die Vorlage nach der Entzerrung immer gleich ausgerichtet.
-    */
     const NORMALIZED_WIDTH = 1000;
     const NORMALIZED_HEIGHT = 820;
 
@@ -594,17 +706,6 @@
       bottomLeft:  { x: 120, y: 720 }
     };
 
-    /*
-      Ausschnitte in der entzerrten Vorlage.
-      Diese Werte sind auf deine neue Vorlage mit vier schwarzen Eckmarken abgestimmt.
-
-      Frage:
-      - Der Ausschnitt beginnt unterhalb des kleinen Hinweises "Frage:".
-
-      Antworten:
-      - Die Ausschnitte beginnen unterhalb der Hinweise "Richtige Antwort:" / "Falsche Antwort:".
-      - Das erste Antwortfeld oben links ist intern die richtige Antwort.
-    */
     const CROP_FIELDS = {
       question: { x: 125, y: 160, w: 750, h: 125 },
 
@@ -614,15 +715,20 @@
       wrong3:   { x: 520, y: 530, w: 370, h: 135 }
     };
 
-    imageInput.addEventListener("change", handleImageUpload);
+    imageInput.addEventListener("change", handleFileSelection);
     detectButton.addEventListener("click", autoDetectMarkers);
     rectifyButton.addEventListener("click", rectifyAndCreateCrops);
+    addQuestionButton.addEventListener("click", addCurrentQuestion);
+    nextPhotoButton.addEventListener("click", loadNextPhoto);
     startQuizButton.addEventListener("click", startQuiz);
-    clearButton.addEventListener("click", clearAll);
+    clearCurrentButton.addEventListener("click", clearCurrentPhoto);
+    clearAllButton.addEventListener("click", clearEverything);
 
     revealButton.addEventListener("click", revealCorrectAnswer);
-    shuffleButton.addEventListener("click", shuffleAndDisplayAnswers);
+    shuffleButton.addEventListener("click", shuffleCurrentQuestionAnswers);
     backButton.addEventListener("click", backToEditor);
+    prevQuestionButton.addEventListener("click", showPreviousQuestion);
+    nextQuestionButton.addEventListener("click", showNextQuestion);
 
     sourceCanvas.addEventListener("pointerdown", handlePointerDown);
     sourceCanvas.addEventListener("pointermove", handlePointerMove);
@@ -631,6 +737,17 @@
     sourceCanvas.addEventListener("pointercancel", stopDragging);
 
     setStatus("OpenCV.js wird geladen. Bitte einen Moment warten ...");
+    updateQuestionCollectionView();
+
+    function createEmptyCrops() {
+      return {
+        question: null,
+        correct: null,
+        wrong1: null,
+        wrong2: null,
+        wrong3: null
+      };
+    }
 
     function setStatus(message) {
       statusBox.style.display = "block";
@@ -639,16 +756,34 @@
 
     function updateButtonStates() {
       const imageIsLoaded = !!loadedImage;
+      const hasCurrentCrops = !!currentCrops.question;
+      const hasQuestions = questions.length > 0;
+      const hasMoreFiles = selectedFiles.length > 0 && currentFileIndex < selectedFiles.length - 1;
 
       detectButton.disabled = !imageIsLoaded || !cvReady;
       rectifyButton.disabled = !imageIsLoaded || !cvReady || !markerPoints;
-      startQuizButton.disabled = !crops.question;
+      addQuestionButton.disabled = !hasCurrentCrops;
+      nextPhotoButton.disabled = !hasMoreFiles;
+      startQuizButton.disabled = !hasQuestions;
     }
 
-    function handleImageUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    function handleFileSelection(event) {
+      selectedFiles = Array.from(event.target.files || []);
+      currentFileIndex = 0;
 
+      if (selectedFiles.length === 0) return;
+
+      loadPhotoFromFile(selectedFiles[currentFileIndex]);
+    }
+
+    function loadNextPhoto() {
+      if (currentFileIndex >= selectedFiles.length - 1) return;
+
+      currentFileIndex++;
+      loadPhotoFromFile(selectedFiles[currentFileIndex]);
+    }
+
+    function loadPhotoFromFile(file) {
       const img = new Image();
 
       img.onload = function () {
@@ -664,12 +799,16 @@
         drawSourcePreview();
 
         workspace.style.display = "grid";
-        cropPreviewSection.style.display = "none";
-        clearCrops();
+
+        clearCurrentCropsOnly();
+
+        const fileInfo = selectedFiles.length > 1
+          ? `Foto ${currentFileIndex + 1} von ${selectedFiles.length} geladen. `
+          : "Foto geladen. ";
 
         setStatus(
-          "Foto geladen. Die gelben Punkte sind zunächst geschätzt. " +
-          "Du kannst die Eckmarken automatisch suchen lassen oder die Punkte manuell verschieben."
+          fileInfo +
+          "Die gelben Punkte sind zunächst geschätzt. Du kannst die Eckmarken automatisch suchen lassen oder manuell verschieben."
         );
 
         updateButtonStates();
@@ -828,13 +967,7 @@
         const hierarchy = new cv.Mat();
 
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-
-        /*
-          Schwarze Bereiche werden weiß markiert.
-          Dadurch lassen sich die gefüllten schwarzen Quadrate finden.
-        */
         cv.threshold(gray, binary, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
-
         cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
         const candidates = [];
@@ -880,8 +1013,7 @@
 
         if (candidates.length < 4) {
           setStatus(
-            "Die Eckmarken konnten nicht sicher erkannt werden. " +
-            "Bitte ziehe die gelben Punkte manuell in die Mitte der vier schwarzen Quadrate."
+            "Die Eckmarken konnten nicht sicher erkannt werden. Bitte ziehe die gelben Punkte manuell auf die schwarzen Quadrate."
           );
           drawSourcePreview();
           updateButtonStates();
@@ -892,6 +1024,7 @@
         const bestFour = candidates.slice(0, 4);
 
         const orderedDisplayPoints = orderPoints(bestFour);
+
         markerPoints = orderedDisplayPoints.map(point => ({
           x: point.x / displayScale,
           y: point.y / displayScale
@@ -900,25 +1033,19 @@
         drawSourcePreview();
 
         setStatus(
-          "Eckmarken wurden erkannt. Bitte prüfe, ob die gelben Punkte genau auf den schwarzen Quadraten liegen. " +
-          "Falls nötig, kannst du sie verschieben."
+          "Eckmarken wurden erkannt. Bitte kurz prüfen. Wenn die gelben Punkte stimmen, klicke auf „Entzerren und Ausschnitte erzeugen“."
         );
 
         updateButtonStates();
       } catch (error) {
         console.error(error);
         setStatus(
-          "Bei der automatischen Erkennung ist ein Fehler aufgetreten. " +
-          "Du kannst die gelben Punkte manuell setzen."
+          "Bei der automatischen Erkennung ist ein Fehler aufgetreten. Du kannst die gelben Punkte manuell setzen."
         );
       }
     }
 
     function orderPoints(points) {
-      /*
-        Ergebnis:
-        [oben links, oben rechts, unten rechts, unten links]
-      */
       const sorted = [...points];
 
       const topLeft = sorted.reduce((best, p) => (p.x + p.y < best.x + best.y ? p : best));
@@ -984,15 +1111,16 @@
         drawCropOverlays();
 
         cropPreviewSection.style.display = "block";
-        startQuizButton.disabled = false;
 
-        setStatus("Ausschnitte wurden erzeugt. Prüfe sie kurz und starte dann das Quiz.");
+        setStatus(
+          "Ausschnitte wurden erzeugt. Wenn alles passt, klicke auf „Diese Frage hinzufügen“."
+        );
+
         updateButtonStates();
       } catch (error) {
         console.error(error);
         setStatus(
-          "Die Entzerrung konnte nicht durchgeführt werden. " +
-          "Prüfe, ob die gelben Punkte richtig auf den vier schwarzen Eckmarken liegen."
+          "Die Entzerrung konnte nicht durchgeführt werden. Prüfe, ob die gelben Punkte richtig auf den Eckmarken liegen."
         );
       }
     }
@@ -1016,17 +1144,17 @@
     }
 
     function createCropsFromNormalizedCanvas() {
-      crops.question = cropFieldToDataUrl(CROP_FIELDS.question);
-      crops.correct = cropFieldToDataUrl(CROP_FIELDS.correct);
-      crops.wrong1 = cropFieldToDataUrl(CROP_FIELDS.wrong1);
-      crops.wrong2 = cropFieldToDataUrl(CROP_FIELDS.wrong2);
-      crops.wrong3 = cropFieldToDataUrl(CROP_FIELDS.wrong3);
+      currentCrops.question = cropFieldToDataUrl(CROP_FIELDS.question);
+      currentCrops.correct = cropFieldToDataUrl(CROP_FIELDS.correct);
+      currentCrops.wrong1 = cropFieldToDataUrl(CROP_FIELDS.wrong1);
+      currentCrops.wrong2 = cropFieldToDataUrl(CROP_FIELDS.wrong2);
+      currentCrops.wrong3 = cropFieldToDataUrl(CROP_FIELDS.wrong3);
 
-      questionPreview.src = crops.question;
-      correctPreview.src = crops.correct;
-      wrong1Preview.src = crops.wrong1;
-      wrong2Preview.src = crops.wrong2;
-      wrong3Preview.src = crops.wrong3;
+      questionPreview.src = currentCrops.question;
+      correctPreview.src = currentCrops.correct;
+      wrong1Preview.src = currentCrops.wrong1;
+      wrong2Preview.src = currentCrops.wrong2;
+      wrong3Preview.src = currentCrops.wrong3;
     }
 
     function cropFieldToDataUrl(field) {
@@ -1051,32 +1179,99 @@
       return canvas.toDataURL("image/png");
     }
 
-    function startQuiz() {
-      if (!crops.question || !crops.correct || !crops.wrong1 || !crops.wrong2 || !crops.wrong3) {
-        alert("Bitte zuerst die Vorlage entzerren und die Ausschnitte erzeugen.");
+    function addCurrentQuestion() {
+      if (!currentCrops.question) {
+        alert("Bitte zuerst die Ausschnitte erzeugen.");
         return;
       }
 
-      quizQuestionImage.src = crops.question;
+      questions.push({
+        question: currentCrops.question,
+        correct: currentCrops.correct,
+        wrong1: currentCrops.wrong1,
+        wrong2: currentCrops.wrong2,
+        wrong3: currentCrops.wrong3
+      });
+
+      updateQuestionCollectionView();
+
+      const hasMore = currentFileIndex < selectedFiles.length - 1;
+
+      if (hasMore) {
+        setStatus(
+          `Frage ${questions.length} wurde hinzugefügt. Du kannst jetzt das nächste Foto laden.`
+        );
+      } else {
+        setStatus(
+          `Frage ${questions.length} wurde hinzugefügt. Du kannst weitere Fotos auswählen oder das Quiz starten.`
+        );
+      }
+
+      clearCurrentCropsOnly();
+      updateButtonStates();
+    }
+
+    function updateQuestionCollectionView() {
+      questionCount.textContent = questions.length;
+      questionList.innerHTML = "";
+
+      if (questions.length === 0) {
+        questionListSection.style.display = "none";
+      } else {
+        questionListSection.style.display = "block";
+      }
+
+      questions.forEach((item, index) => {
+        const box = document.createElement("div");
+        box.className = "question-list-item";
+
+        const title = document.createElement("strong");
+        title.textContent = `Frage ${index + 1}`;
+
+        const img = document.createElement("img");
+        img.src = item.question;
+        img.alt = `Vorschau Frage ${index + 1}`;
+
+        box.appendChild(title);
+        box.appendChild(img);
+
+        questionList.appendChild(box);
+      });
+
+      updateButtonStates();
+    }
+
+    function startQuiz() {
+      if (questions.length === 0) {
+        alert("Bitte füge zuerst mindestens eine Frage hinzu.");
+        return;
+      }
+
+      currentQuizIndex = 0;
 
       editorView.style.display = "none";
       quizView.style.display = "block";
 
-      shuffleAndDisplayAnswers();
+      showQuizQuestion(currentQuizIndex);
 
       if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen().catch(() => {});
       }
     }
 
-    function shuffleAndDisplayAnswers() {
+    function showQuizQuestion(index) {
       removeCorrectHighlight();
 
+      const item = questions[index];
+
+      quizProgress.textContent = `${index + 1} / ${questions.length}`;
+      quizQuestionImage.src = item.question;
+
       const answers = [
-        { image: crops.correct, isCorrect: true },
-        { image: crops.wrong1, isCorrect: false },
-        { image: crops.wrong2, isCorrect: false },
-        { image: crops.wrong3, isCorrect: false }
+        { image: item.correct, isCorrect: true },
+        { image: item.wrong1, isCorrect: false },
+        { image: item.wrong2, isCorrect: false },
+        { image: item.wrong3, isCorrect: false }
       ];
 
       const shuffled = shuffleArray(answers);
@@ -1092,14 +1287,35 @@
 
       correctLetter = null;
 
-      shuffled.forEach((answer, index) => {
-        const letter = letters[index];
+      shuffled.forEach((answer, answerIndex) => {
+        const letter = letters[answerIndex];
         imageElements[letter].src = answer.image;
 
         if (answer.isCorrect) {
           correctLetter = letter;
         }
       });
+
+      prevQuestionButton.disabled = index === 0;
+      nextQuestionButton.disabled = index === questions.length - 1;
+    }
+
+    function shuffleCurrentQuestionAnswers() {
+      showQuizQuestion(currentQuizIndex);
+    }
+
+    function showPreviousQuestion() {
+      if (currentQuizIndex <= 0) return;
+
+      currentQuizIndex--;
+      showQuizQuestion(currentQuizIndex);
+    }
+
+    function showNextQuestion() {
+      if (currentQuizIndex >= questions.length - 1) return;
+
+      currentQuizIndex++;
+      showQuizQuestion(currentQuizIndex);
     }
 
     function shuffleArray(array) {
@@ -1138,14 +1354,8 @@
       }
     }
 
-    function clearCrops() {
-      crops = {
-        question: null,
-        correct: null,
-        wrong1: null,
-        wrong2: null,
-        wrong3: null
-      };
+    function clearCurrentCropsOnly() {
+      currentCrops = createEmptyCrops();
 
       questionPreview.removeAttribute("src");
       correctPreview.removeAttribute("src");
@@ -1153,31 +1363,59 @@
       wrong2Preview.removeAttribute("src");
       wrong3Preview.removeAttribute("src");
 
-      correctLetter = null;
+      cropPreviewSection.style.display = "none";
+
+      updateButtonStates();
     }
 
-    function clearAll() {
+    function clearCurrentPhoto() {
       loadedImage = null;
       markerPoints = null;
       draggingPointIndex = null;
 
-      clearCrops();
-
-      imageInput.value = "";
+      clearCurrentCropsOnly();
 
       workspace.style.display = "none";
-      cropPreviewSection.style.display = "none";
 
       sourceCtx.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);
       rectifiedCtx.clearRect(0, 0, rectifiedCanvas.width, rectifiedCanvas.height);
       originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
-      normalizedCtx.clearRect(0, 0, normalizedCanvas.width, normalizedCanvas.height);
 
-      startQuizButton.disabled = true;
-      detectButton.disabled = true;
-      rectifyButton.disabled = true;
+      setStatus("Aktuelles Foto wurde zurückgesetzt. Die bereits hinzugefügten Fragen bleiben erhalten.");
 
-      setStatus(cvReady ? "Bereit. Bitte ein Foto hochladen." : "OpenCV.js wird geladen ...");
+      updateButtonStates();
+    }
+
+    function clearEverything() {
+      const confirmed = confirm("Möchtest du wirklich alle Fotos und alle gesammelten Fragen löschen?");
+
+      if (!confirmed) return;
+
+      selectedFiles = [];
+      currentFileIndex = 0;
+      questions = [];
+
+      loadedImage = null;
+      markerPoints = null;
+      draggingPointIndex = null;
+      currentQuizIndex = 0;
+      correctLetter = null;
+
+      imageInput.value = "";
+
+      clearCurrentCropsOnly();
+
+      workspace.style.display = "none";
+      questionListSection.style.display = "none";
+      questionList.innerHTML = "";
+      questionCount.textContent = "0";
+
+      sourceCtx.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);
+      rectifiedCtx.clearRect(0, 0, rectifiedCanvas.width, rectifiedCanvas.height);
+      originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+
+      setStatus(cvReady ? "Alles gelöscht. Du kannst neue Fotos hochladen." : "OpenCV.js wird geladen ...");
+
       updateButtonStates();
     }
   </script>
