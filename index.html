@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Logo-Quiz automatisch</title>
 
   <style>
@@ -18,6 +17,7 @@
       --border: #d1d5db;
       --success: #16a34a;
       --danger: #dc2626;
+      --warning: #f59e0b;
       --radius: 20px;
     }
 
@@ -44,8 +44,20 @@
       font-size: clamp(2.2rem, 6vw, 3.8rem);
     }
 
+    .header-counter {
+      display: inline-block;
+      margin-left: 12px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      border: 2px solid rgba(255,255,255,0.35);
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
     main {
-      max-width: 900px;
+      max-width: 980px;
       margin: 24px auto;
       padding: 0 16px 40px;
     }
@@ -88,11 +100,6 @@
     .photo-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 18px 36px rgba(0, 91, 187, 0.36);
-    }
-
-    .photo-button span {
-      display: block;
-      padding: 14px;
     }
 
     input[type="file"] {
@@ -148,6 +155,20 @@
       background: #991b1b;
     }
 
+    button.warning {
+      background: var(--warning);
+      color: #111827;
+    }
+
+    button.warning:hover {
+      background: #d97706;
+    }
+
+    button.small {
+      padding: 9px 13px;
+      font-size: 0.88rem;
+    }
+
     button:disabled {
       opacity: 0.45;
       cursor: not-allowed;
@@ -162,6 +183,11 @@
       border-radius: 12px;
       line-height: 1.4;
       font-weight: 650;
+    }
+
+    .status.warning-status {
+      background: #fffbeb;
+      border-left-color: var(--warning);
     }
 
     .question-counter-box {
@@ -195,6 +221,45 @@
       margin-top: 12px;
       color: var(--danger);
       font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .preview-section {
+      display: none;
+    }
+
+    .large-preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .large-preview-grid .preview-question {
+      grid-column: 1 / -1;
+    }
+
+    .preview-tile {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .preview-tile strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary-dark);
+    }
+
+    .preview-tile img {
+      width: 100%;
+      max-height: 190px;
+      object-fit: contain;
+      display: block;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
     }
 
     .question-list-section {
@@ -203,31 +268,42 @@
 
     .question-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
       margin-top: 14px;
     }
 
     .question-list-item {
       border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 10px;
+      border-radius: 16px;
+      padding: 12px;
       background: #fafafa;
+      display: grid;
+      gap: 10px;
     }
 
     .question-list-item strong {
-      display: block;
-      margin-bottom: 8px;
       color: var(--primary-dark);
     }
 
     .question-list-item img {
       width: 100%;
-      height: 90px;
+      height: 105px;
       object-fit: contain;
       background: white;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #e5e7eb;
+      cursor: pointer;
+    }
+
+    .question-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .question-buttons .full {
+      grid-column: 1 / -1;
     }
 
     .hidden-work-area {
@@ -241,8 +317,6 @@
       border-radius: 14px;
     }
 
-    /* Start-Pop-up */
-
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -255,7 +329,9 @@
     }
 
     .modal {
-      width: min(720px, 100%);
+      width: min(820px, 100%);
+      max-height: 92vh;
+      overflow: auto;
       background: white;
       color: var(--text);
       border-radius: 26px;
@@ -285,7 +361,9 @@
       padding: 18px;
     }
 
-    /* Quiz-Ansicht */
+    .preview-modal {
+      display: none;
+    }
 
     .quiz-screen {
       display: none;
@@ -418,19 +496,13 @@
       width: clamp(54px, 8vw, 78px);
       height: clamp(54px, 8vw, 78px);
       border-radius: 50%;
+      background: #dc2626;
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: clamp(2rem, 5vw, 2.8rem);
       font-weight: 1000;
-    }
-
-    .letter-a,
-    .letter-b,
-    .letter-c,
-    .letter-d {
-      background: #dc2626;
     }
 
     .answer-image-wrap {
@@ -466,8 +538,13 @@
     }
 
     @media (max-width: 700px) {
-      .controls {
+      .controls,
+      .large-preview-grid {
         grid-template-columns: 1fr;
+      }
+
+      .large-preview-grid .preview-question {
+        grid-column: auto;
       }
     }
 
@@ -510,28 +587,59 @@
   <div id="introModal" class="modal-backdrop">
     <div class="modal">
       <h2>So funktioniert das Logo-Quiz</h2>
-
       <p>
         Fotografiere eine oder mehrere ausgefüllte Fragenkarten.
         Die App erkennt die vier schwarzen Eckmarken automatisch, richtet das Foto gerade aus
         und erstellt daraus die Quizfrage.
       </p>
-
       <ul>
         <li>Die vier schwarzen Eckmarken müssen auf dem Foto sichtbar sein.</li>
         <li>Das Foto darf leicht schräg aufgenommen sein.</li>
-        <li>Die App nutzt möglichst genau die schwarzen Rahmen der Textfelder.</li>
-        <li>Wenn eine Karte nicht erkannt wird, wird sie übersprungen und gemeldet.</li>
+        <li>Bei dunklen Fotos versucht die App die Erkennung automatisch zu verbessern.</li>
+        <li>Wenn eine Karte nicht erkannt wird, nennt die App einen wahrscheinlichen Grund.</li>
         <li>Das Quiz ist besonders für ein iPad im Querformat geeignet.</li>
       </ul>
-
       <button id="introOkButton" class="modal-ok">Okay</button>
+    </div>
+  </div>
+
+  <div id="previewModal" class="modal-backdrop preview-modal">
+    <div class="modal">
+      <h2 id="previewModalTitle">Vorschau</h2>
+
+      <div class="large-preview-grid">
+        <div class="preview-tile preview-question">
+          <strong>Frage</strong>
+          <img id="modalQuestionImage" alt="Frage Vorschau" />
+        </div>
+        <div class="preview-tile">
+          <strong>Richtige Antwort</strong>
+          <img id="modalCorrectImage" alt="Richtige Antwort Vorschau" />
+        </div>
+        <div class="preview-tile">
+          <strong>Falsche Antwort 1</strong>
+          <img id="modalWrong1Image" alt="Falsche Antwort 1 Vorschau" />
+        </div>
+        <div class="preview-tile">
+          <strong>Falsche Antwort 2</strong>
+          <img id="modalWrong2Image" alt="Falsche Antwort 2 Vorschau" />
+        </div>
+        <div class="preview-tile">
+          <strong>Falsche Antwort 3</strong>
+          <img id="modalWrong3Image" alt="Falsche Antwort 3 Vorschau" />
+        </div>
+      </div>
+
+      <button id="closePreviewModalButton" class="modal-ok">Vorschau schließen</button>
     </div>
   </div>
 
   <div id="editorView">
     <header>
-      <h1>Logo-Quiz</h1>
+      <h1>
+        Logo-Quiz
+        <span class="header-counter"><span id="headerQuestionCount">0</span> Fragen</span>
+      </h1>
     </header>
 
     <main>
@@ -564,8 +672,38 @@
         </div>
       </section>
 
+      <section id="latestPreviewSection" class="card preview-section">
+        <h2>Vergrößerte Vorschau der zuletzt erkannten Frage</h2>
+
+        <div class="large-preview-grid">
+          <div class="preview-tile preview-question">
+            <strong>Frage</strong>
+            <img id="latestQuestionPreview" alt="Letzte Frage Vorschau" />
+          </div>
+          <div class="preview-tile">
+            <strong>Richtige Antwort</strong>
+            <img id="latestCorrectPreview" alt="Letzte richtige Antwort Vorschau" />
+          </div>
+          <div class="preview-tile">
+            <strong>Falsche Antwort 1</strong>
+            <img id="latestWrong1Preview" alt="Letzte falsche Antwort 1 Vorschau" />
+          </div>
+          <div class="preview-tile">
+            <strong>Falsche Antwort 2</strong>
+            <img id="latestWrong2Preview" alt="Letzte falsche Antwort 2 Vorschau" />
+          </div>
+          <div class="preview-tile">
+            <strong>Falsche Antwort 3</strong>
+            <img id="latestWrong3Preview" alt="Letzte falsche Antwort 3 Vorschau" />
+          </div>
+        </div>
+      </section>
+
       <section id="questionListSection" class="card question-list-section">
         <h2>Fragensammlung</h2>
+        <p>
+          Du kannst Fragen einzeln löschen, nach vorne oder nach hinten verschieben und per Klick vergrößert ansehen.
+        </p>
         <div id="questionList" class="question-list"></div>
       </section>
     </main>
@@ -589,28 +727,28 @@
 
       <div class="quiz-answers">
         <div id="answerBoxA" class="quiz-answer">
-          <div class="big-letter letter-a">A</div>
+          <div class="big-letter">A</div>
           <div class="answer-image-wrap">
             <img id="quizAnswerA" alt="Antwort A" />
           </div>
         </div>
 
         <div id="answerBoxB" class="quiz-answer">
-          <div class="big-letter letter-b">B</div>
+          <div class="big-letter">B</div>
           <div class="answer-image-wrap">
             <img id="quizAnswerB" alt="Antwort B" />
           </div>
         </div>
 
         <div id="answerBoxC" class="quiz-answer">
-          <div class="big-letter letter-c">C</div>
+          <div class="big-letter">C</div>
           <div class="answer-image-wrap">
             <img id="quizAnswerC" alt="Antwort C" />
           </div>
         </div>
 
         <div id="answerBoxD" class="quiz-answer">
-          <div class="big-letter letter-d">D</div>
+          <div class="big-letter">D</div>
           <div class="answer-image-wrap">
             <img id="quizAnswerD" alt="Antwort D" />
           </div>
@@ -662,6 +800,16 @@
     const introModal = document.getElementById("introModal");
     const introOkButton = document.getElementById("introOkButton");
 
+    const previewModal = document.getElementById("previewModal");
+    const closePreviewModalButton = document.getElementById("closePreviewModalButton");
+    const previewModalTitle = document.getElementById("previewModalTitle");
+
+    const modalQuestionImage = document.getElementById("modalQuestionImage");
+    const modalCorrectImage = document.getElementById("modalCorrectImage");
+    const modalWrong1Image = document.getElementById("modalWrong1Image");
+    const modalWrong2Image = document.getElementById("modalWrong2Image");
+    const modalWrong3Image = document.getElementById("modalWrong3Image");
+
     const imageInput = document.getElementById("imageInput");
     const startQuizButton = document.getElementById("startQuizButton");
     const clearAllButton = document.getElementById("clearAllButton");
@@ -672,8 +820,16 @@
     const failedList = document.getElementById("failedList");
 
     const questionCount = document.getElementById("questionCount");
+    const headerQuestionCount = document.getElementById("headerQuestionCount");
     const questionListSection = document.getElementById("questionListSection");
     const questionList = document.getElementById("questionList");
+
+    const latestPreviewSection = document.getElementById("latestPreviewSection");
+    const latestQuestionPreview = document.getElementById("latestQuestionPreview");
+    const latestCorrectPreview = document.getElementById("latestCorrectPreview");
+    const latestWrong1Preview = document.getElementById("latestWrong1Preview");
+    const latestWrong2Preview = document.getElementById("latestWrong2Preview");
+    const latestWrong3Preview = document.getElementById("latestWrong3Preview");
 
     const sourceCanvas = document.getElementById("sourceCanvas");
     const sourceCtx = sourceCanvas.getContext("2d");
@@ -716,6 +872,7 @@
     let loadedImage = null;
     let displayScale = 1;
     let markerPoints = null;
+    let lastDetectionMessage = "";
 
     let questions = [];
     let currentQuizIndex = 0;
@@ -734,7 +891,6 @@
 
     const CROP_FIELDS = {
       question: { x: 112, y: 110, w: 824, h: 154 },
-
       correct:  { x: 111, y: 293, w: 402, h: 153 },
       wrong1:   { x: 531, y: 293, w: 402, h: 153 },
       wrong2:   { x: 111, y: 481, w: 402, h: 153 },
@@ -745,19 +901,30 @@
       introModal.style.display = "none";
     });
 
+    closePreviewModalButton.addEventListener("click", () => {
+      previewModal.style.display = "none";
+    });
+
+    previewModal.addEventListener("click", event => {
+      if (event.target === previewModal) {
+        previewModal.style.display = "none";
+      }
+    });
+
     imageInput.addEventListener("change", handleFileSelection);
     startQuizButton.addEventListener("click", startQuiz);
     clearAllButton.addEventListener("click", clearEverything);
 
     revealButton.addEventListener("click", revealCorrectAnswer);
-    backButton.addEventListener("click", backToEditor);
+    backButton.addEventListener("click", confirmAbortQuiz);
     prevQuestionButton.addEventListener("click", showPreviousQuestion);
-    nextQuestionButton.addEventListener("click", showNextQuestion);
+    nextQuestionButton.addEventListener("click", showNextQuestionOrFinish);
 
     updateQuestionCollectionView();
 
-    function setStatus(message) {
+    function setStatus(message, type = "normal") {
       statusBox.textContent = message;
+      statusBox.classList.toggle("warning-status", type === "warning");
     }
 
     function setProgress(done, total) {
@@ -798,13 +965,12 @@
       failedList.textContent = "";
       updateButtonStates();
 
-      let failedFiles = [];
+      const failedFiles = [];
       setProgress(0, files.length);
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-
-        setStatus(`Verarbeite Foto ${i + 1} von ${files.length} ...`);
+        setStatus(`Verarbeite Foto ${i + 1} von ${files.length}: ${file.name}`);
 
         try {
           const image = await loadImageFromFile(file);
@@ -816,7 +982,10 @@
           const detected = autoDetectMarkers();
 
           if (!detected) {
-            failedFiles.push(file.name);
+            failedFiles.push({
+              name: file.name,
+              reason: lastDetectionMessage || "Die Karte konnte nicht sicher erkannt werden."
+            });
             setProgress(i + 1, files.length);
             continue;
           }
@@ -826,7 +995,10 @@
           const crops = rectifyAndCreateCrops();
 
           if (!crops || !crops.question) {
-            failedFiles.push(file.name);
+            failedFiles.push({
+              name: file.name,
+              reason: "Die Eckmarken wurden erkannt, aber die Felder konnten nicht sauber ausgeschnitten werden."
+            });
             setProgress(i + 1, files.length);
             continue;
           }
@@ -838,7 +1010,10 @@
           setProgress(i + 1, files.length);
         } catch (error) {
           console.error(error);
-          failedFiles.push(file.name);
+          failedFiles.push({
+            name: file.name,
+            reason: "Das Bild konnte nicht verarbeitet werden."
+          });
           setProgress(i + 1, files.length);
         }
 
@@ -853,8 +1028,14 @@
         setStatus(`${files.length} Foto(s) wurden erfolgreich verarbeitet.`);
         failedList.textContent = "";
       } else {
-        setStatus(`${files.length - failedFiles.length} von ${files.length} Foto(s) wurden verarbeitet.`);
-        failedList.innerHTML = "Nicht erkannt: " + failedFiles.map(name => escapeHtml(name)).join(", ");
+        setStatus(`${files.length - failedFiles.length} von ${files.length} Foto(s) wurden verarbeitet. Einige Karten wurden nicht erkannt.`, "warning");
+
+        failedList.innerHTML =
+          "<strong>Nicht erkannt:</strong><br>" +
+          failedFiles.map(item =>
+            `• ${escapeHtml(item.name)}: ${escapeHtml(item.reason)}`
+          ).join("<br>") +
+          "<br><br><strong>Tipp:</strong> Fotografiere die Karte heller, näher und so, dass alle vier schwarzen Eckmarken vollständig sichtbar sind.";
       }
     }
 
@@ -886,7 +1067,7 @@
       originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
       originalCtx.drawImage(loadedImage, 0, 0);
 
-      const maxWidth = 850;
+      const maxWidth = 1000;
       displayScale = Math.min(1, maxWidth / loadedImage.width);
 
       sourceCanvas.width = Math.round(loadedImage.width * displayScale);
@@ -929,69 +1110,126 @@
     function autoDetectMarkers() {
       if (!cvReady || !loadedImage) return false;
 
+      markerPoints = null;
+      lastDetectionMessage = "";
+
       let src = null;
       let gray = null;
-      let binary = null;
-      let contours = null;
-      let hierarchy = null;
+      let equalized = null;
+      let blurred = null;
+      const binaries = [];
 
       try {
         src = cv.imread(sourceCanvas);
         gray = new cv.Mat();
-        binary = new cv.Mat();
-        contours = new cv.MatVector();
-        hierarchy = new cv.Mat();
+        equalized = new cv.Mat();
+        blurred = new cv.Mat();
 
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-        cv.threshold(gray, binary, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
-        cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+        cv.equalizeHist(gray, equalized);
+        cv.GaussianBlur(equalized, blurred, new cv.Size(3, 3), 0);
 
-        const candidates = [];
-        const imageArea = sourceCanvas.width * sourceCanvas.height;
+        const brightness = getAverageBrightness(gray);
 
-        for (let i = 0; i < contours.size(); i++) {
-          const contour = contours.get(i);
-          const rect = cv.boundingRect(contour);
-          const area = cv.contourArea(contour);
+        const otsu = new cv.Mat();
+        cv.threshold(blurred, otsu, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+        binaries.push(otsu);
 
-          const ratio = rect.width / rect.height;
-          const rectArea = rect.width * rect.height;
-          const fillRatio = area / rectArea;
+        const adaptive = new cv.Mat();
+        cv.adaptiveThreshold(
+          blurred,
+          adaptive,
+          255,
+          cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+          cv.THRESH_BINARY_INV,
+          31,
+          8
+        );
+        binaries.push(adaptive);
 
-          const minArea = imageArea * 0.00035;
-          const maxArea = imageArea * 0.03;
+        const thresholdDark = new cv.Mat();
+        cv.threshold(blurred, thresholdDark, 85, 255, cv.THRESH_BINARY_INV);
+        binaries.push(thresholdDark);
 
-          const isSquareLike =
-            ratio > 0.65 &&
-            ratio < 1.45 &&
-            area > minArea &&
-            area < maxArea &&
-            fillRatio > 0.45;
+        const thresholdMedium = new cv.Mat();
+        cv.threshold(blurred, thresholdMedium, 130, 255, cv.THRESH_BINARY_INV);
+        binaries.push(thresholdMedium);
 
-          if (isSquareLike) {
-            candidates.push({
-              x: rect.x + rect.width / 2,
-              y: rect.y + rect.height / 2,
-              width: rect.width,
-              height: rect.height,
-              area
-            });
+        const allCandidates = [];
+
+        binaries.forEach(binary => {
+          const contours = new cv.MatVector();
+          const hierarchy = new cv.Mat();
+
+          try {
+            cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+            const imageArea = sourceCanvas.width * sourceCanvas.height;
+            const minArea = imageArea * 0.00025;
+            const maxArea = imageArea * 0.035;
+
+            for (let i = 0; i < contours.size(); i++) {
+              const contour = contours.get(i);
+              const rect = cv.boundingRect(contour);
+              const area = cv.contourArea(contour);
+              const ratio = rect.width / Math.max(1, rect.height);
+              const rectArea = Math.max(1, rect.width * rect.height);
+              const fillRatio = area / rectArea;
+
+              const isSquareLike =
+                ratio > 0.55 &&
+                ratio < 1.75 &&
+                area > minArea &&
+                area < maxArea &&
+                fillRatio > 0.35 &&
+                rect.width > 8 &&
+                rect.height > 8;
+
+              if (isSquareLike) {
+                allCandidates.push({
+                  x: rect.x + rect.width / 2,
+                  y: rect.y + rect.height / 2,
+                  width: rect.width,
+                  height: rect.height,
+                  area
+                });
+              }
+
+              contour.delete();
+            }
+          } finally {
+            contours.delete();
+            hierarchy.delete();
           }
+        });
 
-          contour.delete();
-        }
+        const candidates = removeDuplicateCandidates(allCandidates);
 
         if (candidates.length < 4) {
-          markerPoints = null;
+          if (brightness < 65) {
+            lastDetectionMessage = "Das Foto ist wahrscheinlich zu dunkel. Bitte heller fotografieren oder mehr Abstand zu Schatten halten.";
+          } else if (brightness > 220) {
+            lastDetectionMessage = "Das Foto ist wahrscheinlich zu hell oder überbelichtet. Bitte mit weniger Spiegelung fotografieren.";
+          } else {
+            lastDetectionMessage = "Nicht alle vier schwarzen Eckmarken wurden erkannt. Bitte die ganze Karte mit allen vier Eckmarken fotografieren.";
+          }
+
           return false;
         }
 
-        candidates.sort((a, b) => b.area - a.area);
+        const bestPoints = chooseExtremeMarkerPoints(candidates);
 
-        const bestFour = candidates.slice(0, 4);
-        const orderedDisplayPoints = orderPoints(bestFour);
+        if (!bestPoints || bestPoints.length !== 4) {
+          lastDetectionMessage = "Es wurden schwarze Formen gefunden, aber die vier Eckmarken konnten nicht eindeutig zugeordnet werden.";
+          return false;
+        }
 
-        markerPoints = orderedDisplayPoints.map(point => ({
+        if (!isPlausibleMarkerLayout(bestPoints)) {
+          lastDetectionMessage = "Die Eckmarken wurden gefunden, liegen aber nicht plausibel. Bitte Karte weniger schräg und vollständig fotografieren.";
+          return false;
+        }
+
+        markerPoints = bestPoints.map(point => ({
           x: point.x / displayScale,
           y: point.y / displayScale
         }));
@@ -999,26 +1237,98 @@
         return true;
       } catch (error) {
         console.error(error);
+        lastDetectionMessage = "Bei der automatischen Erkennung ist ein Fehler aufgetreten.";
         markerPoints = null;
         return false;
       } finally {
         if (src) src.delete();
         if (gray) gray.delete();
-        if (binary) binary.delete();
-        if (contours) contours.delete();
-        if (hierarchy) hierarchy.delete();
+        if (equalized) equalized.delete();
+        if (blurred) blurred.delete();
+        binaries.forEach(mat => mat.delete());
       }
     }
 
-    function orderPoints(points) {
-      const sorted = [...points];
+    function getAverageBrightness(grayMat) {
+      const mean = cv.mean(grayMat);
+      return mean[0];
+    }
 
-      const topLeft = sorted.reduce((best, p) => (p.x + p.y < best.x + best.y ? p : best));
-      const bottomRight = sorted.reduce((best, p) => (p.x + p.y > best.x + best.y ? p : best));
-      const topRight = sorted.reduce((best, p) => (p.x - p.y > best.x - best.y ? p : best));
-      const bottomLeft = sorted.reduce((best, p) => (p.x - p.y < best.x - best.y ? p : best));
+    function removeDuplicateCandidates(candidates) {
+      const sorted = [...candidates].sort((a, b) => b.area - a.area);
+      const result = [];
+      const minDistance = Math.min(sourceCanvas.width, sourceCanvas.height) * 0.035;
 
-      return [topLeft, topRight, bottomRight, bottomLeft];
+      sorted.forEach(candidate => {
+        const tooClose = result.some(existing => {
+          const dx = existing.x - candidate.x;
+          const dy = existing.y - candidate.y;
+          return Math.sqrt(dx * dx + dy * dy) < minDistance;
+        });
+
+        if (!tooClose) {
+          result.push(candidate);
+        }
+      });
+
+      return result;
+    }
+
+    function chooseExtremeMarkerPoints(candidates) {
+      const topLeft = candidates.reduce((best, p) => (p.x + p.y < best.x + best.y ? p : best));
+      const bottomRight = candidates.reduce((best, p) => (p.x + p.y > best.x + best.y ? p : best));
+      const topRight = candidates.reduce((best, p) => (p.x - p.y > best.x - best.y ? p : best));
+      const bottomLeft = candidates.reduce((best, p) => (p.x - p.y < best.x - best.y ? p : best));
+
+      const points = [topLeft, topRight, bottomRight, bottomLeft];
+      const unique = [];
+
+      points.forEach(point => {
+        if (!unique.includes(point)) {
+          unique.push(point);
+        }
+      });
+
+      if (unique.length !== 4) return null;
+
+      return points;
+    }
+
+    function isPlausibleMarkerLayout(points) {
+      const [tl, tr, br, bl] = points;
+
+      const widthTop = distance(tl, tr);
+      const widthBottom = distance(bl, br);
+      const heightLeft = distance(tl, bl);
+      const heightRight = distance(tr, br);
+      const area = polygonArea(points);
+      const imageArea = sourceCanvas.width * sourceCanvas.height;
+
+      const largeEnough = area > imageArea * 0.08;
+      const widthsOk = widthTop > 40 && widthBottom > 40;
+      const heightsOk = heightLeft > 40 && heightRight > 40;
+      const similarWidths = Math.min(widthTop, widthBottom) / Math.max(widthTop, widthBottom) > 0.35;
+      const similarHeights = Math.min(heightLeft, heightRight) / Math.max(heightLeft, heightRight) > 0.35;
+
+      return largeEnough && widthsOk && heightsOk && similarWidths && similarHeights;
+    }
+
+    function distance(a, b) {
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function polygonArea(points) {
+      let area = 0;
+
+      for (let i = 0; i < points.length; i++) {
+        const j = (i + 1) % points.length;
+        area += points[i].x * points[j].y;
+        area -= points[j].x * points[i].y;
+      }
+
+      return Math.abs(area / 2);
     }
 
     function rectifyAndCreateCrops() {
@@ -1090,8 +1400,6 @@
     function drawCropOverlays() {
       rectifiedCtx.lineWidth = 5;
       rectifiedCtx.strokeStyle = "#16a34a";
-      rectifiedCtx.fillStyle = "#16a34a";
-      rectifiedCtx.font = "bold 24px sans-serif";
 
       Object.entries(CROP_FIELDS).forEach(([name, field]) => {
         rectifiedCtx.strokeRect(field.x, field.y, field.w, field.h);
@@ -1131,6 +1439,14 @@
     }
 
     function showLatestCrops(crops) {
+      latestPreviewSection.style.display = "block";
+
+      latestQuestionPreview.src = crops.question;
+      latestCorrectPreview.src = crops.correct;
+      latestWrong1Preview.src = crops.wrong1;
+      latestWrong2Preview.src = crops.wrong2;
+      latestWrong3Preview.src = crops.wrong3;
+
       questionPreview.src = crops.question;
       correctPreview.src = crops.correct;
       wrong1Preview.src = crops.wrong1;
@@ -1140,13 +1456,10 @@
 
     function updateQuestionCollectionView() {
       questionCount.textContent = questions.length;
+      headerQuestionCount.textContent = questions.length;
       questionList.innerHTML = "";
 
-      if (questions.length === 0) {
-        questionListSection.style.display = "none";
-      } else {
-        questionListSection.style.display = "block";
-      }
+      questionListSection.style.display = questions.length === 0 ? "none" : "block";
 
       questions.forEach((item, index) => {
         const box = document.createElement("div");
@@ -1158,14 +1471,89 @@
         const img = document.createElement("img");
         img.src = item.question;
         img.alt = `Vorschau Frage ${index + 1}`;
+        img.addEventListener("click", () => openPreviewModal(index));
+
+        const buttons = document.createElement("div");
+        buttons.className = "question-buttons";
+
+        const moveForwardButton = document.createElement("button");
+        moveForwardButton.className = "small secondary";
+        moveForwardButton.textContent = "nach vorne";
+        moveForwardButton.disabled = index === 0;
+        moveForwardButton.addEventListener("click", () => moveQuestion(index, -1));
+
+        const moveBackwardButton = document.createElement("button");
+        moveBackwardButton.className = "small secondary";
+        moveBackwardButton.textContent = "nach hinten";
+        moveBackwardButton.disabled = index === questions.length - 1;
+        moveBackwardButton.addEventListener("click", () => moveQuestion(index, 1));
+
+        const previewButton = document.createElement("button");
+        previewButton.className = "small full";
+        previewButton.textContent = "Vorschau vergrößern";
+        previewButton.addEventListener("click", () => openPreviewModal(index));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "small danger full";
+        deleteButton.textContent = "Frage löschen";
+        deleteButton.addEventListener("click", () => deleteQuestion(index));
+
+        buttons.appendChild(moveForwardButton);
+        buttons.appendChild(moveBackwardButton);
+        buttons.appendChild(previewButton);
+        buttons.appendChild(deleteButton);
 
         box.appendChild(title);
         box.appendChild(img);
+        box.appendChild(buttons);
 
         questionList.appendChild(box);
       });
 
       updateButtonStates();
+    }
+
+    function moveQuestion(index, direction) {
+      const newIndex = index + direction;
+
+      if (newIndex < 0 || newIndex >= questions.length) return;
+
+      const temp = questions[index];
+      questions[index] = questions[newIndex];
+      questions[newIndex] = temp;
+
+      updateQuestionCollectionView();
+      setStatus(`Frage ${index + 1} wurde verschoben.`);
+    }
+
+    function deleteQuestion(index) {
+      const confirmed = confirm(`Möchtest du Frage ${index + 1} wirklich löschen?`);
+
+      if (!confirmed) return;
+
+      questions.splice(index, 1);
+
+      if (questions.length === 0) {
+        latestPreviewSection.style.display = "none";
+      }
+
+      updateQuestionCollectionView();
+      setStatus(`Frage ${index + 1} wurde gelöscht.`);
+    }
+
+    function openPreviewModal(index) {
+      const item = questions[index];
+      if (!item) return;
+
+      previewModalTitle.textContent = `Vorschau: Frage ${index + 1}`;
+
+      modalQuestionImage.src = item.question;
+      modalCorrectImage.src = item.correct;
+      modalWrong1Image.src = item.wrong1;
+      modalWrong2Image.src = item.wrong2;
+      modalWrong3Image.src = item.wrong3;
+
+      previewModal.style.display = "flex";
     }
 
     function startQuiz() {
@@ -1202,7 +1590,6 @@
       ];
 
       const shuffled = shuffleArray(answers);
-
       const letters = ["A", "B", "C", "D"];
 
       const imageElements = {
@@ -1224,7 +1611,14 @@
       });
 
       prevQuestionButton.disabled = index === 0;
-      nextQuestionButton.disabled = index === questions.length - 1;
+
+      if (index === questions.length - 1) {
+        nextQuestionButton.textContent = "Quiz beenden";
+        nextQuestionButton.classList.add("success");
+      } else {
+        nextQuestionButton.textContent = "Nächste Frage";
+        nextQuestionButton.classList.remove("success");
+      }
     }
 
     function showPreviousQuestion() {
@@ -1234,11 +1628,19 @@
       showQuizQuestion(currentQuizIndex);
     }
 
-    function showNextQuestion() {
-      if (currentQuizIndex >= questions.length - 1) return;
+    function showNextQuestionOrFinish() {
+      if (currentQuizIndex >= questions.length - 1) {
+        finishQuiz();
+        return;
+      }
 
       currentQuizIndex++;
       showQuizQuestion(currentQuizIndex);
+    }
+
+    function finishQuiz() {
+      backToEditor(false);
+      setStatus("Quiz beendet. Du kannst weitere Fotos aufnehmen oder das Quiz erneut starten.");
     }
 
     function shuffleArray(array) {
@@ -1267,13 +1669,26 @@
       });
     }
 
-    function backToEditor() {
+    function confirmAbortQuiz() {
+      const confirmed = confirm("Möchtest du das Quiz wirklich abbrechen?");
+
+      if (!confirmed) return;
+
+      backToEditor(false);
+      setStatus("Quiz abgebrochen. Du kannst es jederzeit erneut starten.");
+    }
+
+    function backToEditor(showMessage = true) {
       quizView.style.display = "none";
       editorView.style.display = "block";
       removeCorrectHighlight();
 
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
+      }
+
+      if (showMessage) {
+        setStatus("Zurück zur Bearbeitung.");
       }
     }
 
@@ -1287,6 +1702,7 @@
       correctLetter = null;
       loadedImage = null;
       markerPoints = null;
+      lastDetectionMessage = "";
       isProcessing = false;
       waitingFiles = [];
 
@@ -1298,9 +1714,18 @@
       wrong2Preview.removeAttribute("src");
       wrong3Preview.removeAttribute("src");
 
+      latestQuestionPreview.removeAttribute("src");
+      latestCorrectPreview.removeAttribute("src");
+      latestWrong1Preview.removeAttribute("src");
+      latestWrong2Preview.removeAttribute("src");
+      latestWrong3Preview.removeAttribute("src");
+
+      latestPreviewSection.style.display = "none";
       questionListSection.style.display = "none";
       questionList.innerHTML = "";
+
       questionCount.textContent = "0";
+      headerQuestionCount.textContent = "0";
       failedList.textContent = "";
 
       setProgress(0, 0);
@@ -1315,7 +1740,7 @@
     }
 
     function escapeHtml(text) {
-      return text
+      return String(text)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
